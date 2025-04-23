@@ -23,12 +23,17 @@
 
 let
   sdClosureInfo = pkgs.buildPackages.closureInfo { rootPaths = storePaths; };
+  btrfs-progs-patched = btrfs-progs.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [
+      ./hardcode-root-uid.patch
+    ];
+  });
 in
 pkgs.stdenv.mkDerivation {
   name = "btrfs-fs.img${lib.optionalString compressImage ".zst"}";
 
   nativeBuildInputs = [
-    btrfs-progs
+    btrfs-progs-patched
     libfaketime
     fakeroot
   ] ++ lib.optional compressImage zstd;
